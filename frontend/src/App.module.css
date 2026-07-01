@@ -1,0 +1,74 @@
+.shell {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background: var(--bg-shell);
+  overflow: hidden;
+}
+
+.main {
+  display: flex;
+  flex: 1;
+  margin-top: 52px; /* header height */
+  overflow: hidden;
+  gap: 0;
+}
+
+/* Map takes remaining space */
+.mapPanel {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-3);
+}
+
+/* DSI sidebar — fixed width on desktop */
+.sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border-subtle);
+  background: rgba(7, 13, 28, 0.6);
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .main { flex-direction: column; }
+  .sidebar {
+    width: 100%;
+    height: 280px;
+    border-left: none;
+    border-top: 1px solid var(--border-subtle);
+    flex-direction: row;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+}
+
+.sidebarHeader {
+  padding: var(--space-4) var(--space-4) var(--space-2);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebarTitle {
+  font-family: var(--font-heading);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--fg-secondary);
+  text-transform: uppercase;
+}
+
+.errorBanner {
+  margin-top: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--status-elevated);
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+}

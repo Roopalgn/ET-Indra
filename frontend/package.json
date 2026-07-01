@@ -1,0 +1,26 @@
+{
+  "name": "indra-frontend",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "@deck.gl/core": "^9.1.5",
+    "@deck.gl/geo-layers": "^9.1.5",
+    "@deck.gl/layers": "^9.1.5",
+    "@deck.gl/react": "^9.1.5",
+    "@luma.gl/core": "^9.1.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^5.4.10"
+  }
+}
