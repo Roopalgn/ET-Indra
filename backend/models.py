@@ -37,3 +37,14 @@ class HealthResponse(BaseModel):
     data_mode: str
     db_connected: bool
     uptime_seconds: float
+
+
+class ScenarioRequest(BaseModel):
+    scenario: Literal["baseline", "A", "B", "C"]
+
+
+class ScenarioResponse(BaseModel):
+    active_scenario: str
+    description: str
+    dsi_response: DSIResponse
+

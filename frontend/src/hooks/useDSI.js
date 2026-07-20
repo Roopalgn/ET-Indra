@@ -1,6 +1,6 @@
 /**
- * useDSI — React hook for polling /api/dsi every 30 seconds.
- * Returns: { data, loading, error, lastUpdated }
+ * useDSI — React hook for polling /api/dsi every 30 seconds and managing interactive scenarios.
+ * Returns: { data, loading, error, lastUpdated, activeScenario, scenarioDescription, switchScenario, refetch }
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 
@@ -12,6 +12,8 @@ export function useDSI() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [lastUpdated, setLastUpdated] = useState(null)
+  const [activeScenario, setActiveScenario] = useState('baseline')
+  const [scenarioDescription, setScenarioDescription] = useState('Baseline Operating Mode — Live Cape tracking with synthetic base random walk.')
   const timerRef = useRef(null)
   const abortRef = useRef(null)
 
@@ -21,18 +23,62 @@ export function useDSI() {
     abortRef.current = ctrl
 
     try {
-      const res = await fetch(`${BACKEND_URL}/api/dsi`, {
+      const res = await fetch(`${BACKEND_URL}/api/scenarios`, {
         signal: ctrl.signal,
         headers: { 'Accept': 'application/json' },
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)
       const json = await res.json()
-      setData(json)
+      setData(json.dsi_response)
+      setActiveScenario(json.active_scenario || 'baseline')
+      setScenarioDescription(json.description || '')
       setError(null)
       setLastUpdated(new Date())
     } catch (err) {
       if (err.name === 'AbortError') return
+      // Fallback to direct /api/dsi if /api/scenarios fails
+      try {
+        const res2 = await fetch(`${BACKEND_URL}/api/dsi`, {
+          signal: ctrl.signal,
+          headers: { 'Accept': 'application/json' },
+        })
+        if (res2.ok) {
+          const json2 = await res2.json()
+          setData(json2)
+          setError(null)
+          setLastUpdated(new Date())
+          return
+        }
+      } catch (e2) {
+        /* ignore */
+      }
       setError(err.message || 'Fetch failed')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const switchScenario = useCallback(async (scenario) => {
+    try {
+      setLoading(true)
+      const res = await fetch(`${BACKEND_URL}/api/scenarios`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({ scenario }),
+      })
+      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const json = await res.json()
+      setData(json.dsi_response)
+      setActiveScenario(json.active_scenario)
+      setScenarioDescription(json.description)
+      setError(null)
+      setLastUpdated(new Date())
+      return json
+    } catch (err) {
+      setError(err.message || 'Failed to switch scenario')
     } finally {
       setLoading(false)
     }
@@ -47,7 +93,16 @@ export function useDSI() {
     }
   }, [fetchDSI])
 
-  return { data, loading, error, lastUpdated, refetch: fetchDSI }
+  return {
+    data,
+    loading,
+    error,
+    lastUpdated,
+    activeScenario,
+    scenarioDescription,
+    switchScenario,
+    refetch: fetchDSI,
+  }
 }
 
 /** Maps threshold string to design token CSS class */

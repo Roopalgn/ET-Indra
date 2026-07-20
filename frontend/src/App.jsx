@@ -1,6 +1,6 @@
 /**
  * INDRA — Main Application
- * Phase 1 layout: header + map (75%) + DSI gauge sidebar (25%)
+ * Phase 2 layout: header (with interactive Scenario HUD) + map + DSI gauge sidebar
  */
 import './styles/globals.css'
 import { useDSI } from './hooks/useDSI'
@@ -10,19 +10,30 @@ import DSIGauges from './components/DSIGauges/index'
 import styles from './App.module.css'
 
 export default function App() {
-  const { data, loading, error, lastUpdated } = useDSI()
+  const {
+    data,
+    loading,
+    error,
+    lastUpdated,
+    activeScenario,
+    scenarioDescription,
+    switchScenario,
+  } = useDSI()
 
   return (
     <div className={styles.shell}>
-      {/* Fixed top navigation */}
+      {/* Fixed top navigation + Scenario HUD */}
       <Header
         systemMode={data?.system_mode ?? 'synthetic'}
         lastUpdated={lastUpdated}
+        activeScenario={activeScenario}
+        scenarioDescription={scenarioDescription}
+        onSwitchScenario={switchScenario}
       />
 
-      {/* Main content area (below 52px header) */}
-      <main className={styles.main}>
-        {/* Map panel — takes most of the viewport */}
+      {/* Main content area (below header/banner) */}
+      <main className={`${styles.main} ${activeScenario !== 'baseline' ? styles.mainWithBanner : ''}`}>
+        {/* Map panel */}
         <section className={styles.mapPanel} aria-label="Shipping corridor map">
           <MapView corridorData={data} />
         </section>
