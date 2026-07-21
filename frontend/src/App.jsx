@@ -1,6 +1,6 @@
 /**
  * INDRA — Main Application
- * Phase 3 layout: header (Scenario HUD + Copilot trigger) + map + DSI / Copilot tabbed sidebar
+ * Phase 4 layout: header (Scenario HUD + Copilot trigger) + map + 5-tab dynamic DSI sidebar
  */
 import { useState } from 'react'
 import './styles/globals.css'
@@ -9,6 +9,9 @@ import Header from './components/Layout/Header'
 import MapView from './components/Map/index'
 import DSIGauges from './components/DSIGauges/index'
 import CopilotPanel from './components/Copilot/CopilotPanel'
+import HistoryChart from './components/History/HistoryChart'
+import SPRWidget from './components/SPR/SPRWidget'
+import ScenarioSliders from './components/Sliders/ScenarioSliders'
 import styles from './App.module.css'
 
 export default function App() {
@@ -22,7 +25,7 @@ export default function App() {
     switchScenario,
   } = useDSI()
 
-  const [sidebarTab, setSidebarTab] = useState('telemetry') // 'telemetry' | 'copilot'
+  const [sidebarTab, setSidebarTab] = useState('telemetry') // 'telemetry' | 'trends' | 'spr' | 'sliders' | 'copilot'
 
   return (
     <div className={styles.shell}>
@@ -43,10 +46,10 @@ export default function App() {
           <MapView corridorData={data} />
         </section>
 
-        {/* DSI / Copilot sidebar */}
+        {/* DSI multi-view sidebar */}
         <aside
-          className={`${styles.sidebar} ${sidebarTab === 'copilot' ? styles.sidebarCopilot : ''}`}
-          aria-label={sidebarTab === 'telemetry' ? 'Disruption Signal Index' : 'Strategic Procurement Copilot'}
+          className={`${styles.sidebar} ${sidebarTab !== 'telemetry' ? styles.sidebarExpanded : ''}`}
+          aria-label="Intelligence & Telemetry Sidebar"
         >
           <div className={styles.sidebarHeader}>
             <div className={styles.tabGroup} role="tablist" aria-label="Sidebar Mode">
@@ -57,7 +60,34 @@ export default function App() {
                 className={`${styles.tabBtn} ${sidebarTab === 'telemetry' ? styles.tabBtnActive : ''}`}
                 onClick={() => setSidebarTab('telemetry')}
               >
-                📊 DSI GAUGES
+                📊 GAUGES
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={sidebarTab === 'trends'}
+                className={`${styles.tabBtn} ${sidebarTab === 'trends' ? styles.tabBtnActive : ''}`}
+                onClick={() => setSidebarTab('trends')}
+              >
+                📈 7D TRENDS
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={sidebarTab === 'spr'}
+                className={`${styles.tabBtn} ${sidebarTab === 'spr' ? styles.tabBtnActive : ''}`}
+                onClick={() => setSidebarTab('spr')}
+              >
+                🛢️ SPR
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={sidebarTab === 'sliders'}
+                className={`${styles.tabBtn} ${sidebarTab === 'sliders' ? styles.tabBtnActive : ''}`}
+                onClick={() => setSidebarTab('sliders')}
+              >
+                ⚙️ SANDBOX
               </button>
               <button
                 type="button"
@@ -66,7 +96,7 @@ export default function App() {
                 className={`${styles.tabBtn} ${sidebarTab === 'copilot' ? styles.tabBtnCopilotActive : ''}`}
                 onClick={() => setSidebarTab('copilot')}
               >
-                ⚡ AI COPILOT
+                ⚡ COPILOT
               </button>
             </div>
             {error && (
@@ -76,14 +106,15 @@ export default function App() {
             )}
           </div>
 
-          {sidebarTab === 'telemetry' ? (
-            <DSIGauges data={data} loading={loading && !data} />
-          ) : (
-            <CopilotPanel activeScenario={activeScenario} corridorData={data} />
-          )}
+          {sidebarTab === 'telemetry' && <DSIGauges data={data} loading={loading && !data} />}
+          {sidebarTab === 'trends' && <HistoryChart />}
+          {sidebarTab === 'spr' && <SPRWidget activeScenario={activeScenario} />}
+          {sidebarTab === 'sliders' && <ScenarioSliders corridorData={data} />}
+          {sidebarTab === 'copilot' && <CopilotPanel activeScenario={activeScenario} corridorData={data} />}
         </aside>
       </main>
     </div>
   )
 }
+
 

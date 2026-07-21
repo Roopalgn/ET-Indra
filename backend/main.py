@@ -14,7 +14,7 @@ from contextlib import asynccontextmanager
 from typing import Optional
 
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -26,8 +26,11 @@ from models import (
     ScenarioResponse,
     CopilotRequest,
     CopilotResponse,
+    HistoryResponse,
+    SPRResponse,
 )
 from copilot import generate_procurement_brief
+from history_spr import get_dsi_history, get_spr_status
 from signal_engine import (
     get_current_dsi,
     get_active_scenario,
@@ -35,7 +38,8 @@ from signal_engine import (
     set_active_scenario,
     aisstream_loop,
 )
-from database import engine, AsyncSessionLocal, Base
+from database import engine, AsyncSessionLocal, Base, get_db
+
 from db_models import DSISnapshotRow
 
 _start_time = time.time()
@@ -174,10 +178,17 @@ async def switch_scenario(request: ScenarioRequest):
     )
 
 
-@app.get("/api/history", tags=["History"], include_in_schema=True)
-async def get_history():
-    """7-day DSI history per corridor. Implemented in Phase 4."""
-    raise HTTPException(status_code=501, detail="Not implemented — Phase 4")
+@app.get("/api/history", response_model=HistoryResponse, tags=["History"])
+async def get_history_route(db = Depends(get_db)):
+    """7-day DSI history per corridor with database snapshots and coherent trend modeling."""
+    return await get_dsi_history(db)
+
+
+@app.get("/api/spr", response_model=SPRResponse, tags=["History"])
+async def get_spr_route(scenario: Optional[str] = None):
+    """Real-time depletion modeling for India's 3 Strategic Petroleum Reserve (SPR) facilities."""
+    return get_spr_status(scenario)
+
 
 
 @app.post("/api/copilot", response_model=CopilotResponse, tags=["Copilot"])

@@ -64,3 +64,34 @@ class CopilotResponse(BaseModel):
     model_used: str
 
 
+class HistoryPoint(BaseModel):
+    timestamp: datetime
+    corridor_id: str
+    dsi: float
+    threshold: str
+    vessel_count: int
+
+
+class HistoryResponse(BaseModel):
+    corridors: dict[str, list[HistoryPoint]]
+    generated_at: datetime
+
+
+class SPRFacility(BaseModel):
+    name: str
+    capacity_mmt: float
+    current_inventory_mmt: float
+    days_of_buffer: float
+
+
+class SPRResponse(BaseModel):
+    total_capacity_mmt: float
+    total_inventory_mmt: float
+    total_days_buffer: float
+    daily_drawdown_rate_mmt: float
+    facilities: list[SPRFacility]
+    scenario: str
+    recommendation: str
+
+
+

@@ -1,0 +1,249 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  padding: var(--space-4);
+  background: rgba(11, 19, 43, 0.85);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  overflow-y: auto;
+  gap: var(--space-4);
+}
+
+.header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: var(--space-3);
+}
+
+.badgeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.sprBadge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: #6366F1;
+  background: rgba(99, 102, 241, 0.15);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.statusBadge {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.statusStable {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10B981;
+}
+
+.statusWarn {
+  background: rgba(249, 115, 22, 0.18);
+  color: #F97316;
+}
+
+.statusAlert {
+  background: rgba(239, 68, 68, 0.2);
+  color: #EF4444;
+  animation: pulse 1.8s infinite;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  color: #E0E7FF;
+  margin: 0 0 2px 0;
+}
+
+.subtitle {
+  font-size: 11px;
+  color: var(--fg-tertiary);
+  margin: 0;
+}
+
+.heroCard {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.bufferMetrics {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.metricBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metricLabel {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  color: var(--fg-tertiary);
+  letter-spacing: 0.05em;
+}
+
+.metricValue {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.metricValue small {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--fg-secondary);
+}
+
+.barWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.barTrack {
+  height: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.barFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.6s ease;
+}
+
+.barLabels {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-tertiary);
+}
+
+.recBanner {
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  font-size: 12px;
+  line-height: 1.5;
+  border-left: 3px solid #6366F1;
+}
+
+.recStable {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: #10B981;
+  color: var(--fg-primary);
+}
+
+.recWarn {
+  background: rgba(249, 115, 22, 0.08);
+  border-color: #F97316;
+  color: var(--fg-primary);
+}
+
+.recEmergency {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: #EF4444;
+  color: #FFFFFF;
+}
+
+.recHeader {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: #818CF8;
+  margin-bottom: 4px;
+}
+
+.recText {
+  margin: 0;
+}
+
+.cavernsGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.cavernCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cavernHeader {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11.5px;
+}
+
+.cavernName {
+  color: #E0E7FF;
+}
+
+.cavernPct {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #A5B4FC;
+}
+
+.cavernBarTrack {
+  height: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.cavernBarFill {
+  height: 100%;
+  border-radius: var(--radius-full);
+  transition: width 0.5s ease;
+}
+
+.cavernFooter {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-tertiary);
+}
+
+.footerNote {
+  font-size: 11px;
+  color: var(--fg-tertiary);
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
