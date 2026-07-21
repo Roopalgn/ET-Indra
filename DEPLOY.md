@@ -1,87 +1,78 @@
-# INDRA — Phase 1 Deployment Guide
-
-## What's running locally right now
-
-| Service  | URL                       | Status |
-|----------|---------------------------|--------|
-| Backend  | http://localhost:8001     | Live   |
-| Frontend | http://localhost:5173     | Live   |
-
-Open **http://localhost:5173** — you should see the Carto Dark Matter map, three corridor paths coloured by DSI, port markers, and the DSI gauge sidebar.
+# INDRA — Full System Deployment Guide
+**India's National Disruption Response Architecture**  
+*Production Deployment & Environment Configuration Guide across Render, Vercel, and Neon PostgreSQL*
 
 ---
 
-## Deploying to Render (Backend)
+## 1. System Topology & Zero-Cost Architecture
+INDRA is engineered to run seamlessly on modern cloud-native serverless platforms with zero required infrastructure spending for demonstration and evaluation:
 
-### 1. Push to GitHub
-```bash
-git init  # if not already
-git add .
-git commit -m "Phase 1: INDRA backend + frontend scaffold"
-git remote add origin https://github.com/YOUR_USERNAME/ET-Indra.git
-git push -u origin main
-```
-
-### 2. Create Render Web Service
-1. Go to [render.com](https://render.com) → New → Web Service
-2. Connect your GitHub repo
-3. Set **Root Directory** to `backend`
-4. Set **Build Command** to: `pip install -r requirements.txt`
-5. Set **Start Command** to: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-6. Select **Free** tier
-
-### 3. Add Environment Variables in Render Dashboard
-```
-DATA_MODE=synthetic
-ENVIRONMENT=production
-CORS_ORIGINS=https://your-app.vercel.app,http://localhost:5173
-```
-> Leave DATABASE_URL blank for Phase 1. Add it in Phase 2 when you have your Neon connection string.
-
-### 4. Set up UptimeRobot
-1. Create free account at [uptimerobot.com](https://uptimerobot.com)
-2. New Monitor → HTTP(s)
-3. URL: `https://your-render-url.onrender.com/health`
-4. Interval: **5 minutes** (free tier default)
-5. This prevents the 15-minute Render spin-down
+| Component | Service Provider | Runtime / Tier | Purpose / Role |
+| :--- | :--- | :--- | :--- |
+| **Backend API** | **Render / Railway** | Python `3.11+` (Web Service) | Ingests WebSockets, runs DSI math engine, and serves Claude Copilot |
+| **Frontend Twin** | **Vercel** | Node.js / Vite Static CDN | Serves React + Deck.gl geospatial map and interactive 5-tab drawer |
+| **Database** | **Neon PostgreSQL**| Serverless PostgreSQL | Stores historical DSI snapshots, tanker coordinates, and SPR logs |
 
 ---
 
-## Deploying to Vercel (Frontend)
-
-### 1. Create Vercel project
-```bash
-npx vercel --cwd frontend
-```
-Or via GitHub import at [vercel.com](https://vercel.com).
-
-### 2. Add Environment Variables in Vercel Dashboard
-```
-VITE_BACKEND_URL=https://your-render-url.onrender.com
-```
-
-### 3. Redeploy after adding the env var
+## 2. Database Setup: Neon Serverless PostgreSQL
+1. Create a free serverless project at [neon.tech](https://neon.tech).
+2. Copy the PostgreSQL connection string (`postgresql://user:password@ep-xxxx.neon.tech/neondb?sslmode=require`).
+3. The backend automatically initializes tables via SQLAlchemy on startup (`database.py` and `db_models.py`):
+   * `corridor_dsi` — Historical DSI snapshots across Hormuz, Red Sea, and Cape.
+   * `tanker_positions` — Rolling spatial logs of VLCC tankers inside bounding boxes.
+   * `spr_snapshots` — ISPRL cavern fill telemetry across Visakhapatnam, Mangalore, and Padur.
 
 ---
 
-## Phase 1 Demo Checklist
+## 3. Backend Deployment (Render / Railway)
 
-Run through this before presenting:
+### 3.1 Render Configuration
+1. Create a new **Web Service** on [render.com](https://render.com) connected to your GitHub repository.
+2. Set **Root Directory** to `backend`.
+3. Set **Build Command** to:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Set **Start Command** to:
+   ```bash
+   uvicorn main:app --host 0.0.0.0 --port $PORT
+   ```
+5. Configure Environment Variables in the Render Dashboard:
+   ```env
+   DATA_MODE=hybrid
+   ENVIRONMENT=production
+   DATABASE_URL=postgresql://user:password@ep-xxxx.neon.tech/neondb?sslmode=require
+   ANTHROPIC_API_KEY=sk-ant-api03-xxxx (Optional: system falls back to instant cache if missing)
+   AISSTREAM_API_KEY=xxxxxxxx (Optional: system blends empirical baselines if missing)
+   CORS_ORIGINS=https://your-frontend-url.vercel.app,http://localhost:5173
+   ```
 
-- [ ] Open the URL — map loads with Carto Dark Matter tiles
-- [ ] Three corridor paths visible, coloured by DSI (Hormuz=orange/red, Red Sea=red, Cape=green)
-- [ ] Eight yellow port markers visible on India's coast
-- [ ] Hover over a corridor path → tooltip shows DSI value + vessel count
-- [ ] Sidebar shows three DSI gauges with arc, value, component bars
-- [ ] Red Sea gauge pulsing (critical)
-- [ ] "SYNTHETIC — DEMONSTRATION" badge visible in header
-- [ ] `GET /api/dsi` returns valid JSON with three corridor objects
-- [ ] `GET /health` returns `{"status":"ok"}`
-- [ ] Values change slightly between 30s polls (sinusoidal drift)
+### 3.2 Uptime / Keep-Alive Configuration
+To prevent free-tier container sleep during judging evaluations:
+* Configure an uptime monitor (e.g., [UptimeRobot](https://uptimerobot.com)) to ping `https://your-backend-url.onrender.com/health` every **5 minutes**.
 
 ---
 
-## Phase 2 Start Condition
+## 4. Frontend Deployment (Vercel)
 
-Phase 2 begins when ALL of the above are confirmed on the deployed URL.
-Phase 2 adds: AISstream WebSocket consumer, scenario panel A/B/C, EIA price feed.
+### 4.1 Vercel Configuration
+1. Import the repository on [vercel.com](https://vercel.com).
+2. Set **Root Directory** to `frontend`.
+3. Select **Vite** as the Framework Preset (`npm run build` as Build Command, `dist` as Output Directory).
+4. Configure Environment Variables in the Vercel Dashboard:
+   ```env
+   VITE_BACKEND_URL=https://your-backend-url.onrender.com
+   ```
+5. Deploy. Every subsequent push to `main` will trigger automatic atomic rebuilds for both backend and frontend.
+
+---
+
+## 5. Pre-Demo Verification Checklist (Final Quality Audit)
+Before stepping into the judging hall, verify these core indicators on your live Vercel URL:
+
+- [x] **Geospatial Basemap:** Map loads cleanly with Carto Dark Matter tiles; 3 shipping lanes (`Hormuz`, `Red Sea`, `Cape`) and Indian coastal ports (`Mundra`, `JNPT`, `Paradip`, `Kochi`) are clearly visible.
+- [x] **Interactive HUD Switchers:** Clicking `[ HORMUZ ]` or `[ CRISIS ]` in the top bar instantly shifts corridor health to red/critical and pulses the DSI gauge.
+- [x] **7-Day Trend Visualization:** Opening `[ 📈 7D TRENDS ]` displays 28-point historical curves across all three corridors with interactive SVG tooltips.
+- [x] **SPR Cavern Depletion Engine:** Opening `[ 🛢️ SPR ]` reflects exact tonnage across `Visakhapatnam (1.33 MMT)`, `Mangalore (1.50 MMT)`, and `Padur (2.50 MMT)` with live survival day calculations (`57.8d` under Scenario A).
+- [x] **Strategic Copilot & Print Export:** Opening `[ ⚡ COPILOT ]` synthesizes a 5-section executive brief tailored to Indian refinery compatibility (`Jamnagar` vs. `WTI`). Clicking **`📄 PDF`** opens a pristine browser print dialog with no navigation clutter.
