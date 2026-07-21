@@ -15,6 +15,7 @@ export default function CopilotPanel({ activeScenario, corridorData }) {
   const [error, setError] = useState(null)
   const [customQuery, setCustomQuery] = useState('')
   const [lastScenario, setLastScenario] = useState(activeScenario)
+  const [copied, setCopied] = useState(false)
 
   const fetchBrief = async (query = null) => {
     setLoading(true)
@@ -56,6 +57,17 @@ export default function CopilotPanel({ activeScenario, corridorData }) {
     setCustomQuery('')
   }
 
+  const handleCopy = () => {
+    if (!briefData?.brief_markdown) return
+    navigator.clipboard.writeText(briefData.brief_markdown)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2500)
+  }
+
+  const handleExportPDF = () => {
+    window.print()
+  }
+
   const timeStr = briefData?.generated_at
     ? new Date(briefData.generated_at).toLocaleTimeString('en-IN', {
         hour: '2-digit',
@@ -73,15 +85,37 @@ export default function CopilotPanel({ activeScenario, corridorData }) {
             <span className={styles.aiPulse} />
             <span className={styles.aiText}>AI COPILOT</span>
           </div>
-          <button
-            type="button"
-            className={styles.refreshBtn}
-            onClick={() => fetchBrief()}
-            disabled={loading}
-            title="Regenerate strategic brief"
-          >
-            {loading ? 'Synthesizing...' : '⚡ Regenerate Brief'}
-          </button>
+          <div className={styles.actionBtns}>
+            {briefData && (
+              <>
+                <button
+                  type="button"
+                  className={styles.toolBtn}
+                  onClick={handleCopy}
+                  title="Copy formatted brief to clipboard"
+                >
+                  {copied ? '✅ Copied' : '📋 Copy'}
+                </button>
+                <button
+                  type="button"
+                  className={styles.toolBtn}
+                  onClick={handleExportPDF}
+                  title="Export executive brief as PDF / Print"
+                >
+                  📄 PDF
+                </button>
+              </>
+            )}
+            <button
+              type="button"
+              className={styles.refreshBtn}
+              onClick={() => fetchBrief()}
+              disabled={loading}
+              title="Regenerate strategic brief"
+            >
+              {loading ? 'Synthesizing...' : '⚡ Regenerate'}
+            </button>
+          </div>
         </div>
 
         {briefData && !loading && (
@@ -96,6 +130,7 @@ export default function CopilotPanel({ activeScenario, corridorData }) {
           </div>
         )}
       </div>
+
 
       {/* Content Body */}
       <div className={styles.body}>
