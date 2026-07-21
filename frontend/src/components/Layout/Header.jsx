@@ -17,6 +17,7 @@ export default function Header({
   activeScenario = 'baseline',
   scenarioDescription,
   onSwitchScenario,
+  onOpenCopilot,
 }) {
   const isLive = systemMode === 'live'
   const isMixed = systemMode === 'mixed'
@@ -40,7 +41,7 @@ export default function Header({
             </span>
           </div>
 
-          {/* Interactive Scenario HUD Controls */}
+          {/* Interactive Scenario HUD Controls + Copilot Quick Trigger */}
           <div className={styles.scenarioGroup} role="group" aria-label="Interactive Scenario Simulation">
             <span className={styles.scenarioTitle}>SCENARIO ENGINE:</span>
             <div className={styles.scenarioButtons}>
@@ -58,8 +59,19 @@ export default function Header({
                   </button>
                 )
               })}
+              {onOpenCopilot && (
+                <button
+                  type="button"
+                  className={styles.copilotTrigger}
+                  onClick={onOpenCopilot}
+                  title="Open Strategic Procurement Copilot"
+                >
+                  ⚡ AI COPILOT
+                </button>
+              )}
             </div>
           </div>
+
 
           {/* Right cluster */}
           <div className={styles.right}>

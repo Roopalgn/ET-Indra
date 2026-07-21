@@ -1,12 +1,14 @@
 /**
  * INDRA — Main Application
- * Phase 2 layout: header (with interactive Scenario HUD) + map + DSI gauge sidebar
+ * Phase 3 layout: header (Scenario HUD + Copilot trigger) + map + DSI / Copilot tabbed sidebar
  */
+import { useState } from 'react'
 import './styles/globals.css'
 import { useDSI } from './hooks/useDSI'
 import Header from './components/Layout/Header'
 import MapView from './components/Map/index'
 import DSIGauges from './components/DSIGauges/index'
+import CopilotPanel from './components/Copilot/CopilotPanel'
 import styles from './App.module.css'
 
 export default function App() {
@@ -20,15 +22,18 @@ export default function App() {
     switchScenario,
   } = useDSI()
 
+  const [sidebarTab, setSidebarTab] = useState('telemetry') // 'telemetry' | 'copilot'
+
   return (
     <div className={styles.shell}>
-      {/* Fixed top navigation + Scenario HUD */}
+      {/* Fixed top navigation + Scenario HUD + Copilot Trigger */}
       <Header
         systemMode={data?.system_mode ?? 'synthetic'}
         lastUpdated={lastUpdated}
         activeScenario={activeScenario}
         scenarioDescription={scenarioDescription}
         onSwitchScenario={switchScenario}
+        onOpenCopilot={() => setSidebarTab('copilot')}
       />
 
       {/* Main content area (below header/banner) */}
@@ -38,21 +43,47 @@ export default function App() {
           <MapView corridorData={data} />
         </section>
 
-        {/* DSI sidebar */}
-        <aside className={styles.sidebar} aria-label="Disruption Signal Index">
+        {/* DSI / Copilot sidebar */}
+        <aside
+          className={`${styles.sidebar} ${sidebarTab === 'copilot' ? styles.sidebarCopilot : ''}`}
+          aria-label={sidebarTab === 'telemetry' ? 'Disruption Signal Index' : 'Strategic Procurement Copilot'}
+        >
           <div className={styles.sidebarHeader}>
-            <h2 className={styles.sidebarTitle}>
-              Disruption Signal Index
-            </h2>
+            <div className={styles.tabGroup} role="tablist" aria-label="Sidebar Mode">
+              <button
+                type="button"
+                role="tab"
+                aria-selected={sidebarTab === 'telemetry'}
+                className={`${styles.tabBtn} ${sidebarTab === 'telemetry' ? styles.tabBtnActive : ''}`}
+                onClick={() => setSidebarTab('telemetry')}
+              >
+                📊 DSI GAUGES
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={sidebarTab === 'copilot'}
+                className={`${styles.tabBtn} ${sidebarTab === 'copilot' ? styles.tabBtnCopilotActive : ''}`}
+                onClick={() => setSidebarTab('copilot')}
+              >
+                ⚡ AI COPILOT
+              </button>
+            </div>
             {error && (
               <div className={styles.errorBanner} role="alert">
                 Backend unreachable — showing cached values
               </div>
             )}
           </div>
-          <DSIGauges data={data} loading={loading && !data} />
+
+          {sidebarTab === 'telemetry' ? (
+            <DSIGauges data={data} loading={loading && !data} />
+          ) : (
+            <CopilotPanel activeScenario={activeScenario} corridorData={data} />
+          )}
         </aside>
       </main>
     </div>
   )
 }
+

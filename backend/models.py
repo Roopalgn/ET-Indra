@@ -3,7 +3,8 @@ INDRA Backend — Pydantic Models (API contracts)
 """
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Literal
+from typing import Literal, Optional
+
 
 
 class ComponentScores(BaseModel):
@@ -47,4 +48,19 @@ class ScenarioResponse(BaseModel):
     active_scenario: str
     description: str
     dsi_response: DSIResponse
+
+
+class CopilotRequest(BaseModel):
+    scenario: Optional[str] = None
+    corridor_id: Optional[str] = None
+    custom_query: Optional[str] = None
+
+
+class CopilotResponse(BaseModel):
+    brief_markdown: str
+    generated_at: datetime
+    source: Literal["anthropic", "cache_fallback"]
+    scenario: str
+    model_used: str
+
 

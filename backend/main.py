@@ -11,13 +11,23 @@ Phase 1 & 2 endpoints:
 import asyncio
 import time
 from contextlib import asynccontextmanager
+from typing import Optional
+
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from config import settings
-from models import HealthResponse, DSIResponse, ScenarioRequest, ScenarioResponse
+from models import (
+    DSIResponse,
+    HealthResponse,
+    ScenarioRequest,
+    ScenarioResponse,
+    CopilotRequest,
+    CopilotResponse,
+)
+from copilot import generate_procurement_brief
 from signal_engine import (
     get_current_dsi,
     get_active_scenario,
@@ -170,7 +180,31 @@ async def get_history():
     raise HTTPException(status_code=501, detail="Not implemented — Phase 4")
 
 
-@app.post("/api/copilot", tags=["Copilot"], include_in_schema=True)
-async def generate_brief():
-    """Procurement Copilot brief. Implemented in Phase 3."""
-    raise HTTPException(status_code=501, detail="Not implemented — Phase 3")
+@app.post("/api/copilot", response_model=CopilotResponse, tags=["Copilot"])
+async def generate_brief_post(request: Optional[CopilotRequest] = None):
+    """
+    Generates actionable Strategic Procurement Briefs using Claude Haiku (if configured)
+    or high-fidelity zero-cost cached fallback briefs per scenario.
+    """
+    req = request or CopilotRequest()
+    return await generate_procurement_brief(
+        scenario=req.scenario,
+        corridor_id=req.corridor_id,
+        custom_query=req.custom_query,
+    )
+
+
+
+@app.get("/api/copilot", response_model=CopilotResponse, tags=["Copilot"])
+async def generate_brief_get(
+    scenario: Optional[str] = None,
+    corridor_id: Optional[str] = None,
+    custom_query: Optional[str] = None,
+):
+    """GET endpoint for Procurement Copilot brief generation."""
+    return await generate_procurement_brief(
+        scenario=scenario,
+        corridor_id=corridor_id,
+        custom_query=custom_query,
+    )
+
